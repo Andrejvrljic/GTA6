@@ -1,25 +1,20 @@
 import * as THREE from 'three';
 import { groundHeightAt } from '../shared/world.js';
+import { buildHumanoid, applyHumanoidPose } from './humanoid.js';
 
 const SKIN_COLORS = [0xe0b089, 0xc68642, 0x8d5524, 0xffdbac];
 const SHIRT_COLORS = [0xb33951, 0x3a86ff, 0x8338ec, 0xfb5607, 0x2a9d8f];
+const PANTS_COLORS = [0x24262e, 0x3b2f2f, 0x1f2a3a, 0x2e2e2e];
 
 export class Npc {
   constructor(scene, x, z) {
-    this.group = new THREE.Group();
-    const bodyMat = new THREE.MeshStandardMaterial({ color: SHIRT_COLORS[Math.floor(Math.random() * SHIRT_COLORS.length)] });
-    const headMat = new THREE.MeshStandardMaterial({ color: SKIN_COLORS[Math.floor(Math.random() * SKIN_COLORS.length)] });
-
-    this.body = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 0.9, 4, 8), bodyMat);
-    this.body.position.y = 0.75;
-    this.body.castShadow = true;
-    this.head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 10), headMat);
-    this.head.position.y = 1.35;
-    this.head.castShadow = true;
-    this.group.add(this.body, this.head);
+    const shirtColor = SHIRT_COLORS[Math.floor(Math.random() * SHIRT_COLORS.length)];
+    const skinColor = SKIN_COLORS[Math.floor(Math.random() * SKIN_COLORS.length)];
+    const pantsColor = PANTS_COLORS[Math.floor(Math.random() * PANTS_COLORS.length)];
+    this.humanoid = buildHumanoid(scene, { shirtColor, skinColor, pantsColor });
+    this.group = this.humanoid.group;
 
     this.group.position.set(x, groundHeightAt(x, z), z);
-    scene.add(this.group);
 
     this.home = new THREE.Vector2(x, z);
     this.target = this.pickTarget();
@@ -35,12 +30,14 @@ export class Npc {
   }
 
   update(dt) {
+    const pos = this.group.position;
+
     if (this.pauseTimer > 0) {
       this.pauseTimer -= dt;
+      applyHumanoidPose(this.humanoid, 'idle', this.walkTime, false);
       return;
     }
 
-    const pos = this.group.position;
     const dx = this.target.x - pos.x;
     const dz = this.target.y - pos.z;
     const dist = Math.hypot(dx, dz);
@@ -58,9 +55,7 @@ export class Npc {
     this.group.rotation.y = Math.atan2(dx, dz);
 
     this.walkTime += dt;
-    const bob = Math.sin(this.walkTime * 7) * 0.05;
-    this.body.position.y = 0.75 + bob;
-    this.head.position.y = 1.35 + bob;
+    applyHumanoidPose(this.humanoid, 'walk', this.walkTime, false);
   }
 }
 

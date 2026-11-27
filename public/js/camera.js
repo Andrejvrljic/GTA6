@@ -15,16 +15,17 @@ export class ThirdPersonCamera {
 
   handleInput({ dx, dy, wheel }) {
     this.yaw -= dx * 0.0032;
-    this.pitch = Math.max(-0.5, Math.min(1.2, this.pitch - dy * 0.0025));
+    this.pitch = Math.max(-0.5, Math.min(1.2, this.pitch + dy * 0.0025));
     this.distance = Math.max(this.minDistance, Math.min(this.maxDistance, this.distance + wheel * 0.01));
   }
 
   update(targetPos, dt) {
     const target = targetPos.clone().add(new THREE.Vector3(0, 1.5, 0));
+    // Kamera hinter dem Spieler (entgegen der Blickrichtung), sonst liefe "vorwärts" optisch rückwärts.
     const offset = new THREE.Vector3(
-      Math.sin(this.yaw) * Math.cos(this.pitch),
+      -Math.sin(this.yaw) * Math.cos(this.pitch),
       Math.sin(this.pitch),
-      Math.cos(this.yaw) * Math.cos(this.pitch)
+      -Math.cos(this.yaw) * Math.cos(this.pitch)
     ).multiplyScalar(this.distance);
 
     const desiredPos = target.clone().add(offset);
