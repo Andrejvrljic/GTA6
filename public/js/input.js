@@ -1,12 +1,15 @@
-// Zentrales Input-Modul: Tastatur + Maus jetzt, Touch/Gamepad später über dieselbe Schnittstelle erweiterbar.
+// Zentrales Input-Modul: Tastatur + Maus (Pointer-Lock, wie in jedem modernen 3D-Spiel üblich –
+// Maus steuert die Kamera immer, ohne Taste gedrückt halten zu müssen). Touch/Gamepad später
+// über dieselbe Schnittstelle erweiterbar.
 export class Input {
   constructor(canvas) {
+    this.canvas = canvas;
     this.keys = new Set();
-    this.mouseDown = false;
     this.mouseDX = 0;
     this.mouseDY = 0;
     this.wheelDelta = 0;
     this.justPressed = new Set();
+    this.locked = false;
 
     window.addEventListener('keydown', (e) => {
       if (!this.keys.has(e.code)) this.justPressed.add(e.code);
@@ -14,16 +17,22 @@ export class Input {
     });
     window.addEventListener('keyup', (e) => this.keys.delete(e.code));
 
-    canvas.addEventListener('mousedown', () => { this.mouseDown = true; });
-    window.addEventListener('mouseup', () => { this.mouseDown = false; });
+    document.addEventListener('pointerlockchange', () => {
+      this.locked = document.pointerLockElement === canvas;
+    });
+
     window.addEventListener('mousemove', (e) => {
-      if (this.mouseDown) {
+      if (this.locked) {
         this.mouseDX += e.movementX || 0;
         this.mouseDY += e.movementY || 0;
       }
     });
     canvas.addEventListener('wheel', (e) => { this.wheelDelta += e.deltaY; }, { passive: true });
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  requestLock() {
+    this.canvas.requestPointerLock?.();
   }
 
   pressed(code) { return this.keys.has(code); }
