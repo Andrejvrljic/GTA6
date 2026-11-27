@@ -27,8 +27,10 @@ const perspCamera = new THREE.PerspectiveCamera(70, window.innerWidth / window.i
 
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, perspCamera));
-const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.55, 0.6, 0.82);
+
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.5, 0.6, 0.86);
 composer.addPass(bloomPass);
+
 composer.addPass(new OutputPass());
 
 function resize() {
