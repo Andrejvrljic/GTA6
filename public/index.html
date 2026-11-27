@@ -10,7 +10,29 @@
 <body>
   <canvas id="view"></canvas>
 
-  <div id="hud">
+  <div id="startScreen" class="overlay">
+    <div class="overlayBox">
+      <h1 class="title">NIGHT CITY</h1>
+      <p class="subtitle">Ein eigenständiges Open-World-Spiel</p>
+      <button id="startButton" class="primaryBtn">Spiel starten</button>
+      <div class="controlsHelp">
+        <div><b>WASD</b> bewegen</div>
+        <div><b>Maus</b> Kamera drehen</div>
+        <div><b>Shift</b> sprinten · <b>Strg</b> hocken · <b>Leertaste</b> springen</div>
+        <div><b>E</b> Fahrzeug ein/aussteigen</div>
+        <div><b>Esc</b> Pause</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pauseScreen" class="overlay hidden">
+    <div class="overlayBox">
+      <h1 class="title">PAUSE</h1>
+      <button id="resumeButton" class="primaryBtn">Weiter spielen</button>
+    </div>
+  </div>
+
+  <div id="hud" class="hidden">
     <div id="minimap"><canvas id="minimapCanvas" width="160" height="160"></canvas></div>
     <div id="bars">
       <div class="bar"><div class="barLabel">Leben</div><div class="barTrack"><div id="healthFill" class="barFill health"></div></div></div>
@@ -18,7 +40,7 @@
     </div>
     <div id="money">💰 <span id="moneyValue">0</span> $</div>
     <div id="speed" class="hidden">🚗 <span id="speedValue">0</span> km/h</div>
-    <div id="hint">WASD bewegen · Shift sprinten · Strg hocken · Leertaste springen · E Fahrzeug ein/aus · Maus ziehen = Kamera</div>
+    <div id="hint">WASD bewegen · Shift sprinten · Strg hocken · Leertaste springen · E Fahrzeug ein/aus · Esc Pause</div>
   </div>
 
   <script type="module" src="js/main.js"></script>
