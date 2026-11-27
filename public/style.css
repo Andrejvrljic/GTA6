@@ -1,0 +1,20 @@
+html, body { margin: 0; height: 100%; overflow: hidden; background: #0a0d12; font-family: system-ui, sans-serif; }
+#view { position: fixed; inset: 0; display: block; }
+
+#hud { position: fixed; inset: 0; pointer-events: none; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+
+#minimap { position: absolute; left: 16px; bottom: 16px; width: 160px; height: 160px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(255,255,255,.6); background: #1a2230; }
+
+#bars { position: absolute; left: 16px; bottom: 190px; width: 180px; display: flex; flex-direction: column; gap: 6px; }
+.bar { display: flex; flex-direction: column; gap: 2px; }
+.barLabel { font-size: 11px; opacity: .85; }
+.barTrack { height: 10px; border-radius: 5px; background: rgba(0,0,0,.45); overflow: hidden; }
+.barFill { height: 100%; width: 100%; transition: width .15s linear; }
+.barFill.health { background: linear-gradient(90deg, #e63946, #ff7b7b); }
+.barFill.stamina { background: linear-gradient(90deg, #2a9d8f, #8fe3c7); }
+
+#money { position: absolute; top: 16px; right: 16px; font-size: 18px; font-weight: 700; }
+#speed { position: absolute; bottom: 16px; right: 16px; font-size: 16px; font-weight: 700; }
+.hidden { display: none !important; }
+
+#hint { position: absolute; top: 16px; left: 16px; font-size: 12px; opacity: .8; max-width: 320px; }
