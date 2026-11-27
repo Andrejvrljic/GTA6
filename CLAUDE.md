@@ -17,3 +17,24 @@ Sobald ein konkretes Spiel/Projekt entsteht, von Anfang an folgendes einrichten 
 - **Performance**: Occlusion Culling, LOD Groups und Sprite-/Texture-Atlasing von Anfang an mitdenken, nicht erst nachträglich.
 
 Diese Punkte gelten als Mindeststandard, bevor an Feinschliff oder zusätzlichen Features gearbeitet wird.
+
+## Deployment-Architektur (Vorbereitung – noch nicht umgesetzt)
+
+Status: Nur geplant/dokumentiert. Es wurde noch kein Spiel, kein Workflow und keine Cloudflare-Ressource erstellt.
+
+Ablauf, sobald es losgeht:
+
+1. **Entwicklung**: Claude baut das Spiel im Repo, testet es selbst, erstellt einen Pull Request nach `main`. Der Nutzer merged ihn manuell.
+2. **CI/CD**: Bei jedem Merge auf `main` veröffentlicht GitHub Actions automatisch auf Cloudflare (Workflow mit `wrangler`, analog zu `.github/workflows/cloudflare.yml` in `Andrejvrljic/Brawl`).
+3. **Cloudflare-Infrastruktur**:
+   - **Worker**: liefert die Spielseite (z. B. Unity-WebGL-Build) aus und beantwortet die API.
+   - **Durable Object**: Multiplayer-Server über WebSocket.
+   - **D1-Datenbank**: Konten, Fortschritt, Rangliste – wird vom Workflow automatisch angelegt, falls nicht vorhanden.
+4. **Browser-Link**: `https://[spielname].dinnerboneagg.workers.dev`. Die Subdomain `dinnerboneagg` existiert bereits – **nur lesend verwenden, nie ändern oder löschen**.
+5. **Secrets**: Zugangsdaten ausschließlich als GitHub Secrets (Repository ist öffentlich!), niemals im Code.
+   - `CLOUDFLARE_API_TOKEN`
+   - `ADMIN_CODE` (falls Admin-Funktionen existieren)
+   - Weitere Secrets werden dem Nutzer vor dem ersten Deployment klar benannt, bevor sie gebraucht werden.
+6. **Live-Test nach Veröffentlichung**: Nach dem Deploy warten, bis die neue Version online ist, dann Seite, Datenbank und Multiplayer prüfen, danach angelegte Test-Konten wieder löschen. Auf „fertig“ vom Nutzer: Status prüfen (alles grün?) und den Link mitteilen.
+
+Hinweis zur Kombination Unity + Cloudflare: Für den Multiplayer-Teil braucht die Unity-WebGL-Build einen eigenen WebSocket-Client, der sich mit dem Durable Object verbindet (kein fertiges Unity-Netcode-Paket spricht nativ mit Durable Objects). Datenbankzugriffe (D1) laufen ausschließlich über die Worker-API, nie direkt vom Client aus.
