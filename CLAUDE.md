@@ -38,3 +38,13 @@ Ablauf, sobald es losgeht:
 6. **Live-Test nach Veröffentlichung**: Nach dem Deploy warten, bis die neue Version online ist, dann Seite, Datenbank und Multiplayer prüfen, danach angelegte Test-Konten wieder löschen. Auf „fertig“ vom Nutzer: Status prüfen (alles grün?) und den Link mitteilen.
 
 Hinweis zur Kombination Unity + Cloudflare: Für den Multiplayer-Teil braucht die Unity-WebGL-Build einen eigenen WebSocket-Client, der sich mit dem Durable Object verbindet (kein fertiges Unity-Netcode-Paket spricht nativ mit Durable Objects). Datenbankzugriffe (D1) laufen ausschließlich über die Worker-API, nie direkt vom Client aus.
+
+### Entscheidung: Unity-Client + separater JS-Server (nicht wie Brawl)
+
+Anders als bei `Andrejvrljic/Brawl` (dort ist das komplette Spiel in JavaScript/three.js geschrieben, Client und Durable-Object-Server teilen sich denselben Code) gilt hier:
+
+- **Unity (WebGL-Build)** ist der Client: Grafik, Gameplay, Steuerung, Physik laufen in Unity/C#.
+- **Durable Object** kann kein Unity/C# ausführen (Cloudflare Workers Runtime = JavaScript/V8). Die autoritative Multiplayer-Logik (Positionsvalidierung, Spielzustand, Matchmaking, Anti-Cheat-Prüfungen) muss deshalb **separat in JavaScript** für das Durable Object nachgebaut werden – es gibt keine gemeinsame Code-Basis wie bei Brawl.
+- Konsequenz: Spielregeln/Berechnungen, die server-seitig autoritativ geprüft werden sollen, existieren **zweimal** – einmal in C# (Unity-Client) und einmal in JavaScript (Durable Object). Bei Änderungen an Spielregeln müssen **beide Seiten synchron gehalten werden**, sonst drohen Client/Server-Divergenzen (z. B. unterschiedliche Schadenswerte) oder Exploits.
+- Die Unity-WebGL-Build spricht mit dem Durable Object über einen selbstgebauten WebSocket-Client (kein fertiges Netcode-Paket).
+- D1-Datenbankzugriffe weiterhin ausschließlich über die Worker-API.
