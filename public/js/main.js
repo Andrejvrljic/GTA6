@@ -7,6 +7,7 @@ import { VehicleView } from './vehicleView.js';
 import { spawnNpcs } from './npc.js';
 import { Weather } from './weather.js';
 import { updateHud, drawMinimap } from './ui.js';
+import { Network } from './network.js';
 
 const canvas = document.getElementById('view');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -44,6 +45,20 @@ const vehicles = [
 ];
 
 const npcs = spawnNpcs(scene, 40, roads);
+
+const network = new Network(scene);
+let money = 2500;
+network.connect().then(() => {
+  if (!network.account) return;
+  money = network.account.money;
+  // Gespeicherte Position übernehmen, sofern es keine Spawn-Default-Position ist
+  if (network.account.x !== 20 || network.account.z !== 20) {
+    player.state.x = network.account.x;
+    player.state.y = network.account.y;
+    player.state.z = network.account.z;
+    player.group.position.set(player.state.x, player.state.y, player.state.z);
+  }
+});
 
 let dayTime = 40; // Start am Vormittag
 let activeVehicle = null;
@@ -101,11 +116,12 @@ function animate() {
   updateHud({
     health: player.state.health,
     stamina: player.state.stamina,
-    money: 2500,
+    money,
     inVehicle: !!activeVehicle,
     speedKmh: activeVehicle ? activeVehicle.speedKmh : 0,
   });
   drawMinimap(trackedPos.x, trackedPos.z, camera.yaw, roads, npcs, vehicles);
+  network.update(dt, performance.now(), trackedPos, camera.yaw, !!activeVehicle, money);
 
   renderer.render(scene, perspCamera);
   requestAnimationFrame(animate);
