@@ -11,14 +11,21 @@ Dieses Projekt wird **nicht mit Unity**, sondern wie `Andrejvrljic/Brawl` (und E
 
 ## Qualitätsstandards für jedes neue Spiel/Projekt hier
 
-Von Anfang an einrichten, nicht erst nachträglich:
+Von Anfang an einrichten, nicht erst nachträglich. Entspricht sinngemäß den früheren Unity-Standards, nur mit three.js-passenden Techniken:
 
-- **Grafik**: three.js mit vernünftigem Lighting-Setup (nicht nur ein einzelnes Directional Light), Schatten, Post-Processing-Effekten (Bloom, Tonemapping) wo sinnvoll für den Stil.
-- **Kamera**: weiche/gefederte Kameraführung (Lerp/Damping), keine starre 1:1-Kamera.
-- **Physik/Kollisionen**: realistische, getestete Werte statt Platzhaltern; bei Fahrzeugen ein eigenes, nachvollziehbares Fahrphysik-Modell.
+| Thema (früher Unity) | Konkrete Umsetzung in three.js |
+|---|---|
+| Render Pipeline (URP/HDRP) | `THREE.WebGLRenderer` mit physisch korrektem Licht (`physicallyCorrectLights`), PBR-Materialien (`MeshStandardMaterial`/`MeshPhysicalMaterial`), HDR-Environment-Maps für realistische Reflexionen. |
+| Kamera (Cinemachine) | Weiche, gefederte Kameraführung per Lerp/Damping (Position + Blickrichtung interpolieren), Kamera-Kollision gegen Level-Geometrie, Screen-Shake-Hooks für Effekte. |
+| Post-Processing | `postprocessing`-Paket oder three.js `EffectComposer` mit Bloom (`UnrealBloomPass`), Tonemapping, Color Grading (LUT), ggf. SSAO. |
+| Physik (Rigidbody/Vehicle) | Physik-Engine **Rapier** (`@dimforge/rapier3d`) oder **cannon-es** für Kollisionen/Rigidbodies; für Fahrzeuge ein Raycast-Vehicle-Modell (Federung pro Rad, Grip/Slip-Kurven) statt simpler Kraftvektoren. |
+| Beleuchtung (Baked/Lightprobes) | Vorgebackene Lightmaps/AO-Texturen für statische Geometrie, `THREE.LightProbe`/`LightProbeGenerator` für dynamische Objekte in vorberechneter Umgebungsbeleuchtung. |
+| Input System | Ein zentrales Input-Modul, das Tastatur/Maus, Touch (z. B. virtueller Joystick wie bei Brawl mit `nipplejs`) und Gamepad (`navigator.getGamepads()`) einheitlich auf dieselben Spiel-Aktionen abbildet. |
+| Performance (Occlusion/LOD/Atlasing) | `THREE.LOD` für Detailstufen, Frustum-Culling (Standard in three.js) + einfaches Occlusion-Culling (Distanz/Octree), Textur-Atlasing und `InstancedMesh` für Wiederholtes (Bäume, Fahrzeuge, NPCs). |
+
+Zusätzlich:
+
 - **Code-Struktur**: gemeinsame Simulation (`shared/`-Code wie bei Brawl) strikt von Darstellung (Rendering, UI) und Netzwerk-Code trennen, damit Client und Server denselben Simulationscode nutzen können.
-- **Performance**: Geometrie-/Textur-Wiederverwendung, Frustum/Occlusion-Culling, LOD wo nötig, besonders wichtig für Mobilgeräte im Browser.
-- **Input**: einheitliches Input-Handling für Tastatur/Maus, Touch (Mobil) und ggf. Gamepad von Anfang an mitdenken.
 
 ## Deployment-Architektur (Vorbereitung – noch nicht umgesetzt)
 
