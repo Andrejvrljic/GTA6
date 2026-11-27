@@ -6,7 +6,7 @@
   "description": "3D-Open-World-Spiel im GTA-Stil (eigene Stadt, eigene Figuren)",
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning server/index.js",
-    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+    "test": "node --disable-warning=ExperimentalWarning --test --test-force-exit test/*.test.js"
   },
   "dependencies": {
     "ws": "^8.18.0"

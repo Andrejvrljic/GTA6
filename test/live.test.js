@@ -32,15 +32,20 @@ if (!BASE) {
   test('Multiplayer: WebSocket-Raum nimmt Verbindungen an', async () => {
     const wsUrl = BASE.replace(/^http/, 'ws') + '/ws';
     const ws = new WebSocket(wsUrl);
-    const welcome = await new Promise((resolve, reject) => {
-      const t = setTimeout(() => reject(new Error('Kein "welcome" vom Multiplayer-Raum erhalten')), 8000);
-      ws.addEventListener('message', (e) => {
-        const msg = JSON.parse(e.data);
-        if (msg.t === 'welcome') { clearTimeout(t); resolve(msg); }
+    try {
+      const welcome = await new Promise((resolve, reject) => {
+        const t = setTimeout(() => reject(new Error('Kein "welcome" vom Multiplayer-Raum erhalten')), 8000);
+        ws.addEventListener('message', (e) => {
+          const msg = JSON.parse(e.data);
+          if (msg.t === 'welcome') { clearTimeout(t); resolve(msg); }
+        });
+        ws.addEventListener('error', (e) => { clearTimeout(t); reject(e); });
       });
-      ws.addEventListener('error', (e) => { clearTimeout(t); reject(e); });
-    });
-    assert.ok(welcome.id);
-    ws.close();
+      assert.ok(welcome.id);
+    } finally {
+      // Unabhängig vom Ausgang schließen – sonst hält eine offene Verbindung den
+      // Node-Prozess (und damit den CI-Job) endlos am Leben, wenn der Test fehlschlägt.
+      ws.close();
+    }
   });
 }

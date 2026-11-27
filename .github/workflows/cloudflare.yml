@@ -84,13 +84,14 @@ jobs:
           echo "### 🏙️ Online: https://gta6.$SUBDOMAIN.workers.dev" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Live-Test (Datenbank, Konto, Multiplayer-Raum)
+        timeout-minutes: 5
         run: |
           URL="https://gta6.$SUBDOMAIN.workers.dev"
           for i in $(seq 1 60); do
             if curl -fs "$URL/api/health" | grep -q "\"version\":\"$GITHUB_SHA\""; then echo "Neue Version ist live."; break; fi
             sleep 3
           done
-          TEST_URL="$URL" node --test test/live.test.js
+          TEST_URL="$URL" node --test --test-force-exit test/live.test.js
 
       - name: Testkonto wieder löschen
         if: always()
